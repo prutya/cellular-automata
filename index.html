@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #222222;
+        color: #c9c9c9;
+      }
+
+      .field {
+        width: calc(10px * 101);
+      }
+
+      .field__cell {
+        height: 10px;
+        width: 10px;
+        border-width: 1px;
+        border-color: #c9c9c9;
+        border-style: solid;
+        float: left;
+      }
+
+      .field__cell--filled {
+        background-color: #c9c9c9;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input id="rule-picker" type="number" value="222" />
+      <button id="render-trigger">
+        Generate
+      </button>
+
+      <div id="field"></div>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html>
