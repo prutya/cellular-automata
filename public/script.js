@@ -1,5 +1,5 @@
 const run = () => {
-  const INITIAL_RULE_SET     = 222;
+  const INITIAL_RULE_SET     = 30;
   const INITIAL_CELLS_NUMBER = 201;
   const INITIAL_GEN_NUMBER   = 200;
 
