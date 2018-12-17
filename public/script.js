@@ -3,11 +3,11 @@ const run = () => {
   const INITIAL_CELLS_NUMBER = 201;
   const INITIAL_GEN_NUMBER   = 200;
 
-  const isBitSet = (number, index) => {
+  const getBit = (number, index) => {
     const mask = 1 << index;
     const maskedNumber = number & mask;
 
-    return maskedNumber > 0;
+    return maskedNumber > 0 ? 1 : 0;
   };
 
   const directives = [
@@ -31,7 +31,7 @@ const run = () => {
       directiveIndex++
     ) {
       const ruleKey = directives[directiveIndex];
-      ruleSet[ruleKey] = isBitSet(ruleIndex, directiveIndex);
+      ruleSet[ruleKey] = getBit(ruleIndex, directiveIndex);
     }
 
     ruleSets.push(ruleSet);
@@ -112,7 +112,7 @@ const run = () => {
         const x = cellIndex * cellWidth;
         const y = rowIndex  * cellHeight;
 
-        if (cell) { ctx.rect(x, y, cellWidth, cellHeight); }
+        if (cell === 1) { ctx.rect(x, y, cellWidth, cellHeight); }
       });
     });
 
