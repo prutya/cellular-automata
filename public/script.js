@@ -81,11 +81,11 @@ const run = () => {
     return field;
   }
 
-  const canvas        = document.querySelector('#field');
-  const renderTrigger = document.querySelector('#render-trigger');
-  const rulePicker    = document.querySelector('#rule-picker');
-  const cellsPicker   = document.querySelector('#cells-picker');
-  const genPicker     = document.querySelector('#gen-picker');
+  const form        = document.querySelector('#form');
+  const rulePicker  = document.querySelector('#rule-picker');
+  const cellsPicker = document.querySelector('#cells-picker');
+  const genPicker   = document.querySelector('#gen-picker');
+  const canvas      = document.querySelector('#field');
 
   let currentRuleIndex   = INITIAL_RULE_SET;
   let currentCellsNumber = INITIAL_CELLS_NUMBER;
@@ -138,7 +138,9 @@ const run = () => {
   resetPickers();
   render();
 
-  renderTrigger.addEventListener('click', (event) => {
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
     const ruleIndex   = parseInt(rulePicker.value);
     const cellsNumber = parseInt(cellsPicker.value);
     const genNumber   = parseInt(genPicker.value);

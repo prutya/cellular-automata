@@ -4,8 +4,8 @@
     <link rel="stylesheet" href="./main.css">
   </head>
   <body>
-    <div>
-      <div class="form">
+    <main>
+      <form class="form" id="form">
         <div class="input-group">
           <label class="input-group__label">Rule set number</label>
           <input class="input-group__input" id="rule-picker" type="number" />
@@ -21,13 +21,11 @@
           <input class="input-group__input" id="gen-picker" type="number" />
         </div>
 
-        <button id="render-trigger">
-          Generate
-        </button>
-      </div>
+        <input type="submit" value="Generate" />
+      </form>
 
       <canvas id="field" width="1400" class="field"></canvas>
-    </div>
+    </main>
     <script type="text/javascript" src="./script.js"></script>
   </body>
 </html>
