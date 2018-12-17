@@ -1,43 +1,259 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        background-color: #222222;
-        color: #c9c9c9;
-      }
-
-      .field {
-        width: calc(10px * 101);
-      }
-
-      .field__cell {
-        height: 10px;
-        width: 10px;
-        border-width: 1px;
-        border-color: #c9c9c9;
-        border-style: solid;
-        float: left;
-      }
-
-      .field__cell--filled {
-        background-color: #c9c9c9;
-      }
-    </style>
+    <style></style>
   </head>
   <body>
     <div>
-      <input id="rule-picker" type="number" value="222" />
+      <div class="input-group">
+        <label class="input-group__label">Rule set number</label>
+        <input
+          class="input-group__input"
+          id="rule-picker"
+          type="number"
+          value="222"
+        />
+      </div>
+
+      <div class="input-group">
+        <label class="input-group__label">Number of cells</label>
+        <input
+          class="input-group__input"
+          id="cells-picker"
+          type="number"
+          value="301"
+        />
+      </div>
+
+      <div class="input-group">
+        <label class="input-group__label">Number of generations</label>
+        <input
+          class="input-group__input"
+          id="gen-picker"
+          type="number"
+          value="300"
+        />
+      </div>
+
       <button id="render-trigger">
         Generate
       </button>
 
       <div id="field"></div>
     </div>
-    <script src="./script.js"></script>
+    <script>
+      const run = () => {
+        const getBit = (number, index) => {
+          const mask = 1 << index;
+          const maskedNumber = number & mask;
+
+          return maskedNumber > 0 ? 1 : 0;
+        };
+
+        const directives = [
+          '000', '001', '010', '011',
+          '100', '101', '110', '111'
+        ]
+
+        const ruleSets = [];
+        const rulesNumber = Math.pow(2, directives.length);
+
+        for (
+          let ruleIndex = 0;
+          ruleIndex < rulesNumber;
+          ruleIndex++
+        ) {
+          const ruleSet = {};
+
+          for(
+            let directiveIndex = 0;
+            directiveIndex < directives.length;
+            directiveIndex++
+          ) {
+            const ruleKey = directives[directiveIndex];
+            ruleSet[ruleKey] = getBit(ruleIndex, directiveIndex);
+          }
+
+          ruleSets.push(ruleSet);
+        }
+
+        const generateField = (
+          appliedRuleSetIndex,
+          cellsNumber,
+          generationsNumber
+        ) => {
+          // NOTE: Create initial field with center cell filled
+          const firstGenLine = new Array(cellsNumber).fill(0);
+          firstGenLine[Math.floor(cellsNumber / 2)] = 1;
+          const field = [firstGenLine];
+
+          for (let genNumber = 1; genNumber < generationsNumber; genNumber++) {
+            const previousGenNumber = genNumber - 1;
+            const currentGenLine    = [];
+
+            for (let cellIndex = 0; cellIndex < cellsNumber; cellIndex++) {
+              const centerFilled = field[previousGenNumber][cellIndex];
+
+              let leftFilled;
+              let rightFilled;
+
+              if (cellIndex === 0) {
+                leftFilled = field[previousGenNumber][cellsNumber - 1];
+              } else {
+                leftFilled = field[previousGenNumber][cellIndex - 1];
+              }
+
+              if (cellIndex === cellsNumber - 1) {
+                rightFilled = field[previousGenNumber][0];
+              } else {
+                rightFilled = field[previousGenNumber][cellIndex + 1];
+              }
+
+              const rule   = `${leftFilled}${centerFilled}${rightFilled}`;
+              const result = ruleSets[appliedRuleSetIndex][rule];
+
+              currentGenLine.push(result);
+            }
+
+            field.push(currentGenLine);
+          }
+
+          return field;
+        }
+
+        const renderStyles = (cellsNumber, generationsNumber) => `
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            background-color: #222222;
+            color: #c9c9c9;
+            font-family: sans-serif;
+            font-weight: 200;
+          }
+
+          .input-group {
+            margin-bottom: 10px;
+          }
+
+          .input-group__label {
+            margin-bottom: 5px;
+            width: 100%;
+            float: left;
+          }
+
+          .input-group__input {
+            width: 100%;
+            float: left;
+            border: 1px solid #c9c9c9;
+            background-color: #222222;
+            color: #ffffff;
+          }
+
+          .input-group::after {
+            display: table;
+            content: "";
+            clear: both;
+          }
+
+          .field {
+            width: ${window.innerWidth}px;
+          }
+
+          .field::after {
+            display: table;
+            content: "";
+            clear: both;
+          }
+
+          .field__cell {
+            width: ${window.innerWidth / cellsNumber}px;
+            height: ${window.innerWidth / cellsNumber}px;
+            float: left;
+          }
+
+          .field__cell--filled {
+            background-color: #c9c9c9;
+          }
+        `;
+
+        const renderField = (field) => `
+          <div class="field">
+            ${
+              field.map(fieldLine =>
+                fieldLine.map(fieldCell => `
+                  <div class="${
+                    fieldCell === 1
+                      ? 'field__cell field__cell--filled'
+                      : 'field__cell'
+                  }">
+                  </div>
+                `).join('')
+              ).join('')
+            }
+          </div>
+        `;
+
+        const styleNode     = document.querySelector('head>style');
+        const fieldNode     = document.querySelector('#field');
+        const renderTrigger = document.querySelector('#render-trigger');
+        const rulePicker    = document.querySelector('#rule-picker');
+        const cellsPicker   = document.querySelector('#cells-picker');
+        const genPicker     = document.querySelector('#gen-picker');
+
+        let currentRuleIndex   = 18;
+        let currentCellsNumber = 351;
+        let currentGenNumber   = 1000;
+
+        const resetPickers = () => {
+          rulePicker.value  = currentRuleIndex;
+          cellsPicker.value = currentCellsNumber;
+          genPicker.value   = currentGenNumber;
+        };
+
+        resetPickers();
+
+        styleNode.innerHTML = renderStyles(currentCellsNumber, currentGenNumber);
+        fieldNode.innerHTML = renderField(
+          generateField(currentRuleIndex, currentCellsNumber, currentGenNumber)
+        );
+
+        renderTrigger.addEventListener('click', (event) => {
+          const ruleIndex   = parseInt(rulePicker.value);
+          const cellsNumber = parseInt(cellsPicker.value);
+          const genNumber   = parseInt(genPicker.value);
+
+          if (ruleIndex > rulesNumber - 1 || ruleIndex < 0) {
+            alert(`Rule number should be between 0 and ${rulesNumber - 1}`);
+            resetPickers();
+            return;
+          }
+
+          if (cellsNumber < 1) {
+            alert('Cells number should be greater than zero');
+            resetPickers();
+            return;
+          }
+
+          if (genNumber < 1) {
+            alert('Generations number should be greater than zero');
+            resetPickers();
+            return;
+          }
+
+          currentRuleIndex   = ruleIndex;
+          currentCellsNumber = cellsNumber;
+          currentGenNumber   = genNumber;
+
+          styleNode.innerHTML = renderStyles(currentCellsNumber, currentGenNumber);
+          fieldNode.innerHTML = renderField(
+            generateField(currentRuleIndex, currentCellsNumber, currentGenNumber)
+          );
+        });
+      };
+
+      run();
+    </script>
   </body>
 </html>
