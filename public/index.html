@@ -1,43 +1,105 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style></style>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        padding: 0;
+        margin: 0;
+      }
+
+      body {
+        background-color: #222222;
+        color: #c9c9c9;
+        font-family: sans-serif;
+        font-weight: 200;
+      }
+
+      .form {
+        width: 25vw;
+        padding: 10px;
+      }
+
+      .input-group {
+        margin-bottom: 10px;
+      }
+
+      .input-group__label {
+        margin-bottom: 5px;
+        width: 100%;
+        float: left;
+      }
+
+      .input-group__input {
+        width: 100%;
+        float: left;
+        border: 1px solid #c9c9c9;
+        background-color: #222222;
+        color: #ffffff;
+      }
+
+      .input-group::after {
+        display: table;
+        content: "";
+        clear: both;
+      }
+
+      .field {
+        width: 100vw;
+      }
+
+      .field::after {
+        display: table;
+        content: "";
+        clear: both;
+      }
+
+      .field__row {
+        width: 100vw;
+        float: left;
+      }
+
+      .field__row::after {
+        display: table;
+        content: "";
+        clear: both;
+      }
+
+      .field__row__cell--filled {
+        background-color: #c9c9c9;
+      }
+
+      .field__row__cell {
+        float: left;
+      }
+    </style>
+    <style id="style-dynamic"></style>
   </head>
   <body>
     <div>
-      <div class="input-group">
-        <label class="input-group__label">Rule set number</label>
-        <input
-          class="input-group__input"
-          id="rule-picker"
-          type="number"
-          value="222"
-        />
-      </div>
+      <div class="form">
+        <div class="input-group">
+          <label class="input-group__label">Rule set number</label>
+          <input class="input-group__input" id="rule-picker" type="number" />
+        </div>
 
-      <div class="input-group">
-        <label class="input-group__label">Number of cells</label>
-        <input
-          class="input-group__input"
-          id="cells-picker"
-          type="number"
-          value="301"
-        />
-      </div>
+        <div class="input-group">
+          <label class="input-group__label">Number of cells</label>
+          <input class="input-group__input" id="cells-picker" type="number" />
+        </div>
 
-      <div class="input-group">
-        <label class="input-group__label">Number of generations</label>
-        <input
-          class="input-group__input"
-          id="gen-picker"
-          type="number"
-          value="300"
-        />
-      </div>
+        <div class="input-group">
+          <label class="input-group__label">Number of generations</label>
+          <input class="input-group__input" id="gen-picker" type="number" />
+        </div>
 
-      <button id="render-trigger">
-        Generate
-      </button>
+        <button id="render-trigger">
+          Generate
+        </button>
+      </div>
 
       <div id="field"></div>
     </div>
@@ -121,60 +183,10 @@
           return field;
         }
 
-        const renderStyles = (cellsNumber, generationsNumber) => `
-          * {
-            box-sizing: border-box;
-          }
-
-          body {
-            background-color: #222222;
-            color: #c9c9c9;
-            font-family: sans-serif;
-            font-weight: 200;
-          }
-
-          .input-group {
-            margin-bottom: 10px;
-          }
-
-          .input-group__label {
-            margin-bottom: 5px;
-            width: 100%;
-            float: left;
-          }
-
-          .input-group__input {
-            width: 100%;
-            float: left;
-            border: 1px solid #c9c9c9;
-            background-color: #222222;
-            color: #ffffff;
-          }
-
-          .input-group::after {
-            display: table;
-            content: "";
-            clear: both;
-          }
-
-          .field {
-            width: ${window.innerWidth}px;
-          }
-
-          .field::after {
-            display: table;
-            content: "";
-            clear: both;
-          }
-
-          .field__cell {
-            width: ${window.innerWidth / cellsNumber}px;
-            height: ${window.innerWidth / cellsNumber}px;
-            float: left;
-          }
-
-          .field__cell--filled {
-            background-color: #c9c9c9;
+        const renderDynamicStyles = (cellsNumber, generationsNumber) => `
+          .field__row__cell {
+            width: calc(100vw / ${cellsNumber});
+            height: calc(100vw / ${cellsNumber});
           }
         `;
 
@@ -185,8 +197,8 @@
                 fieldLine.map(fieldCell => `
                   <div class="${
                     fieldCell === 1
-                      ? 'field__cell field__cell--filled'
-                      : 'field__cell'
+                      ? 'field__row__cell field__row__cell--filled'
+                      : 'field__row__cell'
                   }">
                   </div>
                 `).join('')
@@ -195,16 +207,16 @@
           </div>
         `;
 
-        const styleNode     = document.querySelector('head>style');
+        const styleNode     = document.querySelector('#style-dynamic');
         const fieldNode     = document.querySelector('#field');
         const renderTrigger = document.querySelector('#render-trigger');
         const rulePicker    = document.querySelector('#rule-picker');
         const cellsPicker   = document.querySelector('#cells-picker');
         const genPicker     = document.querySelector('#gen-picker');
 
-        let currentRuleIndex   = 18;
-        let currentCellsNumber = 351;
-        let currentGenNumber   = 1000;
+        let currentRuleIndex   = 30;
+        let currentCellsNumber = 201;
+        let currentGenNumber   = 200;
 
         const resetPickers = () => {
           rulePicker.value  = currentRuleIndex;
@@ -212,12 +224,23 @@
           genPicker.value   = currentGenNumber;
         };
 
-        resetPickers();
+        const render = () => {
+          const field = generateField(
+            currentRuleIndex,
+            currentCellsNumber,
+            currentGenNumber
+          );
 
-        styleNode.innerHTML = renderStyles(currentCellsNumber, currentGenNumber);
-        fieldNode.innerHTML = renderField(
-          generateField(currentRuleIndex, currentCellsNumber, currentGenNumber)
-        );
+          styleNode.innerHTML = renderDynamicStyles(
+            currentCellsNumber,
+            currentGenNumber
+          );
+
+          fieldNode.innerHTML = renderField(field);
+        }
+
+        resetPickers();
+        render();
 
         renderTrigger.addEventListener('click', (event) => {
           const ruleIndex   = parseInt(rulePicker.value);
@@ -246,10 +269,7 @@
           currentCellsNumber = cellsNumber;
           currentGenNumber   = genNumber;
 
-          styleNode.innerHTML = renderStyles(currentCellsNumber, currentGenNumber);
-          fieldNode.innerHTML = renderField(
-            generateField(currentRuleIndex, currentCellsNumber, currentGenNumber)
-          );
+          render();
         });
       };
 
