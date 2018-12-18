@@ -109,21 +109,94 @@ const run = () => {
     ctx.fill();
   };
 
-  const canvas = document.querySelector('#field');
+  const FIELD_WIDTH_DEFAULT = 201;
+  const FIELD_WIDTH_MAX     = 1000;
 
-  const FIELD_WIDTH  = 201;
-  const FIELD_HEIGHT = 201;
-  const RULE         = 459188;
+  const FIELD_HEIGHT_DEFAULT = 201;
+  const FIELD_HEIGHT_MAX     = 1000;
 
-  let field = createEmptyField(FIELD_WIDTH, FIELD_HEIGHT);
-  field[Math.floor(FIELD_HEIGHT / 2)][Math.floor(FIELD_WIDTH / 2)] = true;
+  const RULE_MAX     = 4294967296;
+  const RULE_DEFAULT = 459188;
 
-  renderField(field, canvas);
+  // NOTE: 60 Frames per second
+  const FPS_DEFAULT = 60;
+  const FPS_MIN     = 0.1;
+  const FPS_MAX     = 120;
 
-  setInterval(() => {
-    field = calculateNextGenerationField(field, RULE);
+  const ONE_SECOND = 1000;
+
+  const canvas      = document.querySelector('#field');
+  const form        = document.querySelector('#form');
+  const rulePicker  = document.querySelector('#rule-picker');
+  const widthPicker = document.querySelector('#width-picker');
+  const fpsPicker   = document.querySelector('#fps-picker');
+
+  let field;
+  let intervalId;
+  let currentRule   = RULE_DEFAULT;
+  let currentWidth  = FIELD_WIDTH_DEFAULT;
+  let currentHeight = FIELD_HEIGHT_DEFAULT;
+  let currentFps    = FPS_DEFAULT;
+
+  const resetSimulation = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+
+    field = createEmptyField(currentWidth, currentHeight);
+    field[Math.floor(currentHeight / 2)][Math.floor(currentWidth / 2)] = true;
+
     renderField(field, canvas);
-  }, 16);
+
+    intervalId = setInterval(() => {
+      field = calculateNextGenerationField(field, currentRule);
+      renderField(field, canvas);
+    }, ONE_SECOND / currentFps);
+  };
+
+  const resetForm = () => {
+    rulePicker.value  = currentRule;
+    widthPicker.value = currentWidth;
+    fpsPicker.value = currentFps;
+  }
+
+  resetForm();
+  resetSimulation();
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const newRule = parseInt(rulePicker.value);
+
+    if (newRule < 0 || newRule >= RULE_MAX ) {
+      alert(`Rule number should be between 0 and ${RULE_MAX}.`);
+      resetForm();
+      return;
+    }
+
+    const newWidth = parseInt(widthPicker.value);
+
+    if (newWidth < 1 || newWidth >= FIELD_WIDTH_MAX) {
+      alert(`Width should be between 1 and ${FIELD_WIDTH_MAX}.`);
+      resetForm();
+      return;
+    }
+
+    const newFps = parseFloat(fpsPicker.value);
+
+    if (newFps < FPS_MIN || newFps > FPS_MAX) {
+      alert(`FPS should be between ${FPS_MIN} and ${FPS_MAX}`);
+      resetForm();
+      return;
+    }
+
+    currentRule = newRule;
+    currentWidth = newWidth;
+    currentHeight = currentWidth;
+    currentFps = newFps;
+
+    resetSimulation();
+  });
 };
 
 run();

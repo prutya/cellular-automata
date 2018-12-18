@@ -5,7 +5,26 @@
   </head>
   <body>
     <main>
-      <canvas id="field" width="800"></canvas>      
+      <form class="form" id="form">
+        <div class="input-group">
+          <label class="input-group__label">Rule set number</label>
+          <input class="input-group__input" id="rule-picker" type="number" />
+        </div>
+
+        <div class="input-group">
+          <label class="input-group__label">Field width</label>
+          <input class="input-group__input" id="width-picker" type="number" />
+        </div>
+
+        <div class="input-group">
+          <label class="input-group__label">FPS</label>
+          <input class="input-group__input" id="fps-picker" type="number" step="0.1" />
+        </div>
+
+        <input type="submit" value="Set" />
+      </form>
+
+      <canvas id="field" width="800"></canvas>
     </main>
     <script type="text/javascript" src="./script.js"></script>
   </body>
