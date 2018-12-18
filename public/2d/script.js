@@ -113,7 +113,7 @@ const run = () => {
 
   const FIELD_WIDTH  = 201;
   const FIELD_HEIGHT = 201;
-  const RULE         = 10078;
+  const RULE         = 459188;
 
   let field = createEmptyField(FIELD_WIDTH, FIELD_HEIGHT);
   field[Math.floor(FIELD_HEIGHT / 2)][Math.floor(FIELD_WIDTH / 2)] = true;
@@ -123,7 +123,7 @@ const run = () => {
   setInterval(() => {
     field = calculateNextGenerationField(field, RULE);
     renderField(field, canvas);
-  }, 200);
+  }, 16);
 };
 
 run();
