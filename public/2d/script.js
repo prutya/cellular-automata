@@ -97,11 +97,13 @@ const run = () => {
 
     for (let rowIndex = 0; rowIndex < field.length; rowIndex++) {
       for (let cellIndex = 0; cellIndex < field[rowIndex].length; cellIndex++) {
-        const x = cellIndex * cellWidth;
-        const y = rowIndex  * cellHeight;
-
         if (field[rowIndex][cellIndex]) {
-          ctx.rect(x, y, cellWidth, cellHeight);
+          ctx.rect(
+            cellIndex * cellWidth,
+            rowIndex  * cellHeight,
+            cellWidth,
+            cellHeight
+          );
         }
       }
     }
@@ -109,19 +111,21 @@ const run = () => {
     ctx.fill();
   };
 
-  const FIELD_WIDTH_DEFAULT = 201;
-  const FIELD_WIDTH_MAX     = 1000;
+  const WIDTH_MIN     = 1;
+  const WIDTH_MAX     = 1001;
+  const WIDTH_DEFAULT = 201;
 
-  const FIELD_HEIGHT_DEFAULT = 201;
-  const FIELD_HEIGHT_MAX     = 1000;
+  const HEIGHT_MIN     = 1
+  const HEIGHT_MAX     = 1001;
+  const HEIGHT_DEFAULT = 201;
 
+  const RULE_MIN     = 0;
   const RULE_MAX     = 4294967296;
-  const RULE_DEFAULT = 459188;
+  const RULE_DEFAULT = 150;
 
-  // NOTE: 60 Frames per second
-  const FPS_DEFAULT = 60;
   const FPS_MIN     = 0.1;
   const FPS_MAX     = 120;
+  const FPS_DEFAULT = 60;
 
   const ONE_SECOND = 1000;
 
@@ -134,8 +138,8 @@ const run = () => {
   let field;
   let intervalId;
   let currentRule   = RULE_DEFAULT;
-  let currentWidth  = FIELD_WIDTH_DEFAULT;
-  let currentHeight = FIELD_HEIGHT_DEFAULT;
+  let currentWidth  = WIDTH_DEFAULT;
+  let currentHeight = HEIGHT_DEFAULT;
   let currentFps    = FPS_DEFAULT;
 
   const resetSimulation = () => {
@@ -168,16 +172,16 @@ const run = () => {
 
     const newRule = parseInt(rulePicker.value);
 
-    if (newRule < 0 || newRule >= RULE_MAX ) {
-      alert(`Rule number should be between 0 and ${RULE_MAX}.`);
+    if (newRule < RULE_MIN || newRule >= RULE_MAX ) {
+      alert(`Rule number should be between ${RULE_MIN} and ${RULE_MAX}.`);
       resetForm();
       return;
     }
 
     const newWidth = parseInt(widthPicker.value);
 
-    if (newWidth < 1 || newWidth >= FIELD_WIDTH_MAX) {
-      alert(`Width should be between 1 and ${FIELD_WIDTH_MAX}.`);
+    if (newWidth < WIDTH_MIN || newWidth >= WIDTH_MAX) {
+      alert(`Width should be between ${WIDTH_MIN} and ${WIDTH_MAX}.`);
       resetForm();
       return;
     }
