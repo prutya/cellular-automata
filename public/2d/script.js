@@ -34,6 +34,28 @@ const run = () => {
     return field;
   };
 
+  const fillFieldRandomly = (field, probability) => {
+    probability = probability || 0.333333;
+
+    const width  = field[0].length;
+    const height = field.length;
+
+    for (let rowIndex = 0; rowIndex < height; rowIndex++) {
+      for (let cellIndex = 0; cellIndex < width; cellIndex++) {
+        if (Math.random() > probability) {
+          field[rowIndex][cellIndex] = true;
+        }
+      }
+    }
+  };
+
+  const fillFieldCenter = (field) => {
+    const width = field[0].length;
+    const height = field.length;
+
+    field[Math.floor(height / 2)][Math.floor(width / 2)] = true;
+  };
+
   const calculateNextGenerationField = (prevField, rule) => {
     const width  = prevField[0].length;
     const height = prevField.length;
@@ -132,19 +154,22 @@ const run = () => {
   const TEXT_PAUSE = '❙❙';
   const TEXT_PLAY  = '▶';
 
-  const canvas       = document.querySelector('#field');
-  const form         = document.querySelector('#form');
-  const rulePicker   = document.querySelector('#rule-picker');
-  const widthPicker  = document.querySelector('#width-picker');
-  const fpsPicker    = document.querySelector('#fps-picker');
+  const canvas = document.querySelector('#field');
+  const form = document.querySelector('#form');
+  const rulePicker = document.querySelector('#rule-picker');
+  const widthPicker = document.querySelector('#width-picker');
+  const fpsPicker = document.querySelector('#fps-picker');
+  const cellsCenterRadio = document.querySelector('#cells-center');
+  const cellsRandomRadio = document.querySelector('#cells-random');
   const pauseTrigger = document.querySelector('#pause-trigger');
 
   let field;
-  let intervalId;
+  let clockId;
   let currentRule   = RULE_DEFAULT;
   let currentWidth  = WIDTH_DEFAULT;
   let currentHeight = HEIGHT_DEFAULT;
   let currentFps    = FPS_DEFAULT;
+  let currentRandom = false;
   let generationNum = 0;
 
   const renderNextGen = () => {
@@ -154,14 +179,14 @@ const run = () => {
   }
 
   const stopClock = () => {
-    if (!intervalId) { return; }
+    if (!clockId) { return; }
 
-    clearInterval(intervalId);
-    intervalId = null;
+    clearInterval(clockId);
+    clockId = null;
   }
 
   const startClock = () => {
-    intervalId = setInterval(renderNextGen, ONE_SECOND / currentFps);
+    clockId = setInterval(renderNextGen, ONE_SECOND / currentFps);
   }
 
   const resetSimulation = () => {
@@ -171,7 +196,12 @@ const run = () => {
 
     generationNum = 0;
     field = createEmptyField(currentWidth, currentHeight);
-    field[Math.floor(currentHeight / 2)][Math.floor(currentWidth / 2)] = true;
+
+    if (currentRandom) {
+      fillFieldRandomly(field);
+    } else {
+      fillFieldCenter(field);
+    }
 
     renderField(field, canvas);
 
@@ -182,13 +212,21 @@ const run = () => {
     rulePicker.value       = currentRule;
     widthPicker.value      = currentWidth;
     fpsPicker.value        = currentFps;
-    pauseTrigger.innerText = intervalId ? TEXT_PAUSE : TEXT_PLAY;
+    pauseTrigger.innerText = clockId ? TEXT_PAUSE : TEXT_PLAY;
+
+    if (currentRandom) {
+      cellsCenterRadio.checked = false;
+      cellsRandomRadio.checked = true;
+    } else {
+      cellsCenterRadio.checked = true;
+      cellsRandomRadio.checked = false;
+    }
   }
 
   pauseTrigger.addEventListener('click', (event) => {
     event.preventDefault();
 
-    if (intervalId) {
+    if (clockId) {
       stopClock();
       event.target.innerText = TEXT_PLAY;
     } else {
@@ -224,10 +262,13 @@ const run = () => {
       return;
     }
 
+    const newRandom = cellsRandomRadio.checked;
+
     currentRule = newRule;
     currentWidth = newWidth;
     currentHeight = currentWidth;
     currentFps = newFps;
+    currentRandom = newRandom;
 
     resetSimulation();
   });
