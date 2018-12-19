@@ -101,7 +101,7 @@ const run = () => {
     return field;
   };
 
-  const renderField = (field, canvas) => {
+  const renderField = (field, canvas, generationNum) => {
     const ctx = canvas.getContext('2d');
 
     canvas.height = canvas.width;
@@ -131,6 +131,12 @@ const run = () => {
     }
 
     ctx.fill();
+
+    if (isNaN(generationNum)) { return; }
+
+    ctx.font = '15px sans-serif';
+    ctx.fillStyle = '#00ffaa';
+    ctx.fillText(generationNum, 10, canvas.height - 10);
   };
 
   const WIDTH_MIN     = 1;
@@ -175,7 +181,7 @@ const run = () => {
   const renderNextGen = () => {
     generationNum++;
     field = calculateNextGenerationField(field, currentRule);
-    renderField(field, canvas);
+    renderField(field, canvas, generationNum);
   }
 
   const stopClock = () => {
@@ -203,7 +209,7 @@ const run = () => {
       fillFieldCenter(field);
     }
 
-    renderField(field, canvas);
+    renderField(field, canvas, generationNum);
 
     startClock();
   };
