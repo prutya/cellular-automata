@@ -121,7 +121,7 @@ const run = () => {
 
   const RULE_MIN     = 0;
   const RULE_MAX     = 4294967296;
-  const RULE_DEFAULT = 150;
+  const RULE_DEFAULT = 4290460072;
 
   const FPS_MIN     = 0.1;
   const FPS_MAX     = 120;
@@ -129,11 +129,12 @@ const run = () => {
 
   const ONE_SECOND = 1000;
 
-  const canvas      = document.querySelector('#field');
-  const form        = document.querySelector('#form');
-  const rulePicker  = document.querySelector('#rule-picker');
-  const widthPicker = document.querySelector('#width-picker');
-  const fpsPicker   = document.querySelector('#fps-picker');
+  const canvas       = document.querySelector('#field');
+  const form         = document.querySelector('#form');
+  const rulePicker   = document.querySelector('#rule-picker');
+  const widthPicker  = document.querySelector('#width-picker');
+  const fpsPicker    = document.querySelector('#fps-picker');
+  const pauseTrigger = document.querySelector('#pause-trigger');
 
   let field;
   let intervalId;
@@ -141,31 +142,57 @@ const run = () => {
   let currentWidth  = WIDTH_DEFAULT;
   let currentHeight = HEIGHT_DEFAULT;
   let currentFps    = FPS_DEFAULT;
+  let generationNum = 0;
+
+  const renderNextGen = () => {
+    generationNum++;
+    field = calculateNextGenerationField(field, currentRule);
+    renderField(field, canvas);
+  }
+
+  const stopClock = () => {
+    if (!intervalId) { return; }
+
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+
+  const startClock = () => {
+    intervalId = setInterval(renderNextGen, ONE_SECOND / currentFps);
+  }
 
   const resetSimulation = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
+    stopClock();
 
+    pauseTrigger.innerText = '❙❙';
+
+    generationNum = 0;
     field = createEmptyField(currentWidth, currentHeight);
     field[Math.floor(currentHeight / 2)][Math.floor(currentWidth / 2)] = true;
 
     renderField(field, canvas);
 
-    intervalId = setInterval(() => {
-      field = calculateNextGenerationField(field, currentRule);
-      renderField(field, canvas);
-    }, ONE_SECOND / currentFps);
+    startClock();
   };
 
   const resetForm = () => {
-    rulePicker.value  = currentRule;
-    widthPicker.value = currentWidth;
-    fpsPicker.value = currentFps;
+    rulePicker.value       = currentRule;
+    widthPicker.value      = currentWidth;
+    fpsPicker.value        = currentFps;
+    pauseTrigger.innerText = intervalId ? '❙❙' : '▶';
   }
 
-  resetForm();
-  resetSimulation();
+  pauseTrigger.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    if (intervalId) {
+      stopClock();
+      event.target.innerText = '▶'
+    } else {
+      startClock();
+      event.target.innerText = '❙❙'
+    }
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -201,6 +228,9 @@ const run = () => {
 
     resetSimulation();
   });
+
+  resetSimulation();
+  resetForm();
 };
 
 run();
