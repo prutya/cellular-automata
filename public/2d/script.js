@@ -129,6 +129,9 @@ const run = () => {
 
   const ONE_SECOND = 1000;
 
+  const TEXT_PAUSE = '❙❙';
+  const TEXT_PLAY  = '▶';
+
   const canvas       = document.querySelector('#field');
   const form         = document.querySelector('#form');
   const rulePicker   = document.querySelector('#rule-picker');
@@ -164,7 +167,7 @@ const run = () => {
   const resetSimulation = () => {
     stopClock();
 
-    pauseTrigger.innerText = '❙❙';
+    pauseTrigger.innerText = TEXT_PAUSE;
 
     generationNum = 0;
     field = createEmptyField(currentWidth, currentHeight);
@@ -179,7 +182,7 @@ const run = () => {
     rulePicker.value       = currentRule;
     widthPicker.value      = currentWidth;
     fpsPicker.value        = currentFps;
-    pauseTrigger.innerText = intervalId ? '❙❙' : '▶';
+    pauseTrigger.innerText = intervalId ? TEXT_PAUSE : TEXT_PLAY;
   }
 
   pauseTrigger.addEventListener('click', (event) => {
@@ -187,10 +190,10 @@ const run = () => {
 
     if (intervalId) {
       stopClock();
-      event.target.innerText = '▶'
+      event.target.innerText = TEXT_PLAY;
     } else {
       startClock();
-      event.target.innerText = '❙❙'
+      event.target.innerText = TEXT_PAUSE;
     }
   });
 
