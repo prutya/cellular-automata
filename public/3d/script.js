@@ -13,9 +13,9 @@ const run = () => {
     precision mediump float;
 
     attribute vec3 vertPosition;
-    attribute vec3 vertColor;
+    attribute vec4 vertColor;
 
-    varying vec3 fragColor;
+    varying vec4 fragColor;
 
     uniform mat4 mWorld;
     uniform mat4 mView;
@@ -30,10 +30,10 @@ const run = () => {
   const fragmentShaderText = `
     precision mediump float;
 
-    varying vec3 fragColor;
+    varying vec4 fragColor;
 
     void main() {
-      gl_FragColor = vec4(fragColor, 1.0);
+      gl_FragColor = fragColor;
     }
   `;
 
@@ -84,42 +84,44 @@ const run = () => {
     return;
   }
 
+  const color = [0.75, 0.25, 0.0, 0.5];
+
   const boxVertices = [
      // Top
-     -1.0,  1.0, -1.0,   1.0, 1.0, 0.0,
-     -1.0,  1.0,  1.0,   1.0, 1.0, 0.0,
-      1.0,  1.0,  1.0,   1.0, 1.0, 0.0,
-      1.0,  1.0, -1.0,   1.0, 1.0, 0.0,
+     -1.0,  1.0, -1.0,   ...color,
+     -1.0,  1.0,  1.0,   ...color,
+      1.0,  1.0,  1.0,   ...color,
+      1.0,  1.0, -1.0,   ...color,
 
      // Left
-     -1.0,  1.0,  1.0,   0.7, 0.0, 0.1,
-     -1.0, -1.0,  1.0,   0.7, 0.0, 0.1,
-     -1.0, -1.0, -1.0,   0.7, 0.0, 0.1,
-     -1.0,  1.0, -1.0,   0.7, 0.0, 0.1,
+     -1.0,  1.0,  1.0,   ...color,
+     -1.0, -1.0,  1.0,   ...color,
+     -1.0, -1.0, -1.0,   ...color,
+     -1.0,  1.0, -1.0,   ...color,
 
      // Right
-      1.0,  1.0,  1.0,   0.0, 0.5, 0.5,
-      1.0, -1.0,  1.0,   0.0, 0.5, 0.5,
-      1.0, -1.0, -1.0,   0.0, 0.5, 0.5,
-      1.0,  1.0, -1.0,   0.0, 0.5, 0.5,
+      1.0,  1.0,  1.0,   ...color,
+      1.0, -1.0,  1.0,   ...color,
+      1.0, -1.0, -1.0,   ...color,
+      1.0,  1.0, -1.0,   ...color,
 
      // Front
-      1.0,  1.0,  1.0,   0.0, 1.0, 0.7,
-      1.0, -1.0,  1.0,   0.0, 1.0, 0.7,
-     -1.0, -1.0,  1.0,   0.0, 1.0, 0.7,
-     -1.0,  1.0,  1.0,   0.0, 1.0, 0.7,
+      1.0,  1.0,  1.0,   ...color,
+      1.0, -1.0,  1.0,   ...color,
+     -1.0, -1.0,  1.0,   ...color,
+     -1.0,  1.0,  1.0,   ...color,
 
      // Back
-      1.0,  1.0, -1.0,   0.3, 0.2, 0.5,
-      1.0, -1.0, -1.0,   0.3, 0.2, 0.5,
-     -1.0, -1.0, -1.0,   0.3, 0.2, 0.5,
-     -1.0,  1.0, -1.0,   0.3, 0.2, 0.5,
+      1.0,  1.0, -1.0,   ...color,
+      1.0, -1.0, -1.0,   ...color,
+     -1.0, -1.0, -1.0,   ...color,
+     -1.0,  1.0, -1.0,   ...color,
 
      // Bottom
-     -1.0, -1.0, -1.0,   0.1, 0.5, 0.2,
-     -1.0, -1.0,  1.0,   0.1, 0.5, 0.2,
-      1.0, -1.0,  1.0,   0.1, 0.5, 0.2,
-      1.0, -1.0, -1.0,   0.1, 0.5, 0.2,
+     -1.0, -1.0, -1.0,   ...color,
+     -1.0, -1.0,  1.0,   ...color,
+      1.0, -1.0,  1.0,   ...color,
+      1.0, -1.0, -1.0,   ...color,
   ];
 
   const boxIndices = [
@@ -164,16 +166,16 @@ const run = () => {
     3, // Number of values
     gl.FLOAT, // Type
     gl.FALSE, // ?
-    6 * Float32Array.BYTES_PER_ELEMENT, // Vertex size
+    7 * Float32Array.BYTES_PER_ELEMENT, // Vertex size
     0 // Offset
   );
 
   gl.vertexAttribPointer(
     colorAttribLocation,
-    3,
+    4,
     gl.FLOAT,
     gl.FALSE,
-    6 * Float32Array.BYTES_PER_ELEMENT,
+    7 * Float32Array.BYTES_PER_ELEMENT,
     3 * Float32Array.BYTES_PER_ELEMENT
   );
 
@@ -196,7 +198,7 @@ const run = () => {
     matView,
     [0, 0, -5.5],
     [0, 0, 0],
-    [0, 1, 0]
+    [0, 1, 0],
   );
 
   mat4.perspective(
@@ -204,17 +206,22 @@ const run = () => {
     glMatrix.toRadian(45),
     canvas.width / canvas.height,
     0.1,
-    1000.0
+    1000.0,
   );
 
   gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, matWorld);
   gl.uniformMatrix4fv(matViewUniformLocation,  gl.FALSE, matView);
   gl.uniformMatrix4fv(matProjUniformLocation,  gl.FALSE, matProj);
 
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
-  gl.frontFace(gl.CCW);
-  gl.cullFace(gl.BACK);
+  // Enable aplha blend mode
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+  // Enable depth test and culling
+  // gl.enable(gl.DEPTH_TEST);
+  // gl.enable(gl.CULL_FACE);
+  // gl.frontFace(gl.CCW);
+  // gl.cullFace(gl.BACK);
 
   const matRotateX = new Float32Array(16);
   const matRotateY = new Float32Array(16);
