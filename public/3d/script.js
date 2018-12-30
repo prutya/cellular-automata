@@ -22,7 +22,7 @@ const app = () => {
   const controls = new THREE.OrbitControls(camera);
 
   // NOTE: Init lighting
-  const ambient = new t.AmbientLight(0x555555);
+  const ambient = new t.AmbientLight(0x8b8b8b);
 
   const light = new t.DirectionalLight(0xffffff);
   light.position = camera.position;
@@ -30,8 +30,17 @@ const app = () => {
   scene.add(light);
   scene.add(ambient);
 
+  // NOTE: Init canvas
+  const canvas = document.getElementById('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
   // NOTE: Init renderer
-  const renderer = new t.WebGLRenderer({ alpha: true, antialias: false });
+  const renderer = new t.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: false
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.context.disable(renderer.context.DEPTH_TEST);
 
@@ -87,12 +96,12 @@ const app = () => {
   const cubeMaterialTransparent = new t.MeshLambertMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.75,
   });
   const cubeMaterialOpaque = new t.MeshLambertMaterial({
     color: 0xe41654,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.75,
   })
 
   for (let i = 0; i < cells.length; i++) {
@@ -114,9 +123,6 @@ const app = () => {
   }
 
   scene.add(field);
-
-  // NOTE: Insert canvas
-  document.body.appendChild(renderer.domElement);
 
   // NOTE: Animation loop
   const animate = () => {
