@@ -38,28 +38,28 @@ const app = () => {
   // NOTE: Init cells
   const cells = [
     [
-      [1, 1, 0, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [0, 0, 0, 0],
+      [true, false, true, false],
+      [true, false, true, false],
+      [true, false, true, false],
+      [true, false, true, false],
     ],
     [
-      [1, 1, 0, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [0, 0, 0, 0],
+      [false, false, true, true],
+      [false, false, true, true],
+      [false, false, true, true],
+      [false, false, true, true],
     ],
     [
-      [1, 1, 0, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [0, 0, 0, 0],
+      [false, false, true, true],
+      [false, false, true, true],
+      [false, false, true, true],
+      [false, false, true, true],
     ],
     [
-      [1, 1, 0, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [0, 0, 0, 0],
+      [false, true, true, false],
+      [false, true, true, false],
+      [false, true, true, false],
+      [false, true, true, false],
     ],
   ];
 
@@ -100,7 +100,7 @@ const app = () => {
       for(let k = 0; k < cells[0][0].length; k++) {
         const cube = new t.Mesh(
           cubeGeometry,
-          cells[i][j][k] > 0 ? cubeMaterialOpaque : cubeMaterialTransparent
+          cells[i][j][k] ? cubeMaterialOpaque : cubeMaterialTransparent
         );
 
         cube.position.x = i * cubeSize + cubeDelta;
