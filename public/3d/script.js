@@ -1,6 +1,19 @@
 // import t from 't';
 
 const app = () => {
+  const getRandomInt = (max) =>
+    Math.floor(Math.random() * Math.floor(max));
+
+  const numberToBitArray = (number, bitsCount = 32) => {
+    const result = (new Array(bitsCount)).fill(false);
+
+    for (let bitIndex = 0; bitIndex < result.length; bitIndex++) {
+      result[bitIndex] = ((number >> bitIndex) & 1) > 0;
+    }
+
+    return result;
+  };
+
   const bitArrayToNumber = (bits) => {
     let result = 0;
 
@@ -39,8 +52,6 @@ const app = () => {
     const depth  = prevField.length;
     const height = prevField[0].length;
     const width  = prevField[0][0].length;
-
-    console.log('Calculating next generation field');
 
     const field = createEmptyField(width, height, depth);
 
@@ -103,7 +114,7 @@ const app = () => {
     return field;
   };
 
-  const FIELD_DEPTH  = 27;
+  const FIELD_DEPTH  = 17;
   const FIELD_HEIGHT = FIELD_DEPTH;
   const FIELD_WIDTH  = FIELD_HEIGHT;
 
@@ -116,10 +127,22 @@ const app = () => {
 
   field[dotZ][dotX][dotY] = true;
 
-  const currentRule = (new Array(128)).fill(true);
-  for (let i = 0; i < currentRule.length; i++) {
-    currentRule[i] = i % 2 > 0;
-  }
+  const currentRulePart1 = getRandomInt(4294967295);
+  const currentRulePart2 = getRandomInt(4294967295);
+  const currentRulePart3 = getRandomInt(4294967295);
+  const currentRulePart4 = getRandomInt(4294967295);
+
+  console.log(currentRulePart1);
+  console.log(currentRulePart2);
+  console.log(currentRulePart3);
+  console.log(currentRulePart4);
+
+  const currentRule = [
+    ...numberToBitArray(currentRulePart1, 32),
+    ...numberToBitArray(currentRulePart2, 32),
+    ...numberToBitArray(currentRulePart3, 32),
+    ...numberToBitArray(currentRulePart4, 32),
+  ];
 
   const fieldSize = 5.0;
   const fieldMargin = 0.05;
