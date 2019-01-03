@@ -1,6 +1,9 @@
 // import t from 't';
 
-const app = () => {
+// NOTE: Shorthand alias for Three.js
+const t = THREE;
+
+const run = () => {
   const getRandomInt = (max) =>
     Math.floor(Math.random() * Math.floor(max));
 
@@ -44,6 +47,16 @@ const app = () => {
 
       field[planeIndex] = plane;
     }
+
+    return field;
+  };
+
+  const setCenterCell = (field, value = true) => {
+    const z = Math.floor(field.length / 2);
+    const y = Math.floor(field[0].length / 2);
+    const x = Math.floor(field[0][0].length / 2);
+
+    field[z][y][x] = value;
 
     return field;
   };
@@ -114,50 +127,76 @@ const app = () => {
     return field;
   };
 
-  const FIELD_DEPTH  = 17;
-  const FIELD_HEIGHT = FIELD_DEPTH;
-  const FIELD_WIDTH  = FIELD_HEIGHT;
+  // NOTE: Object model sizes
+  const FIELD_SIZE   = 17
+  const FIELD_DEPTH  = FIELD_SIZE;
+  const FIELD_HEIGHT = FIELD_SIZE;
+  const FIELD_WIDTH  = FIELD_SIZE;
 
-  let field = createEmptyField(FIELD_DEPTH, FIELD_HEIGHT, FIELD_WIDTH);
-  let cubes = createEmptyField(FIELD_DEPTH, FIELD_HEIGHT, FIELD_WIDTH);
+  // NOTE: Render shading
+  const R_BG_COLOR            = 0x000000;
+  const R_LIGHT_AMBIENT_COLOR = 0x8b8b8b;
+  const R_LIGHT_DIRECT_COLOR  = 0xffffff;
 
-  const dotZ = Math.floor(FIELD_DEPTH / 2);
-  const dotY = Math.floor(FIELD_HEIGHT / 2);
-  const dotX = Math.floor(FIELD_WIDTH / 2);
+  // NOTE: Render sizes
+  const R_FIELD_SIZE       = 5.0;
+  const R_FIELD_MARGIN     = 0.05;
+  const R_FIELD_SIZE_INNER = R_FIELD_SIZE - 2 * R_FIELD_MARGIN;
+  const R_CUBE_SIZE        = R_FIELD_SIZE_INNER / FIELD_SIZE;
+  const R_CUBE_MARGIN      = 0.05;
+  const R_CUBE_SIZE_INNER  = R_CUBE_SIZE - 2 * R_CUBE_MARGIN;
+  const R_CUBE_OFFSET      = -(R_FIELD_SIZE_INNER / 2) + R_CUBE_SIZE / 2
 
-  field[dotZ][dotX][dotY] = true;
+  // NOTE: Render objects params
+  const R_FIELD_GEOMETRY = new t.BoxGeometry(
+    R_FIELD_SIZE,
+    R_FIELD_SIZE,
+    R_FIELD_SIZE,
+  );
+  const R_FIELD_MATERIAL = new t.MeshLambertMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.2,
+  });
+  const R_CUBE_GEOMETRY = new t.BoxGeometry(
+    R_CUBE_SIZE_INNER,
+    R_CUBE_SIZE_INNER,
+    R_CUBE_SIZE_INNER,
+  );
+  const R_CUBE_MATERIAL_BLANK = new t.MeshLambertMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.75,
+  });
+  const R_CUBE_MATERIAL_FILLED = new t.MeshLambertMaterial({
+    color: 0xe41654,
+    transparent: true,
+    opacity: 0.75,
+  })
 
-  const currentRulePart1 = getRandomInt(4294967295);
-  const currentRulePart2 = getRandomInt(4294967295);
-  const currentRulePart3 = getRandomInt(4294967295);
-  const currentRulePart4 = getRandomInt(4294967295);
-
-  console.log(currentRulePart1);
-  console.log(currentRulePart2);
-  console.log(currentRulePart3);
-  console.log(currentRulePart4);
-
-  const currentRule = [
-    ...numberToBitArray(currentRulePart1, 32),
-    ...numberToBitArray(currentRulePart2, 32),
-    ...numberToBitArray(currentRulePart3, 32),
-    ...numberToBitArray(currentRulePart4, 32),
+  const RULE_DEFAULT = [
+    ...numberToBitArray(621375902),
+    ...numberToBitArray(2960227347),
+    ...numberToBitArray(4095321793),
+    ...numberToBitArray(2586228668),
   ];
 
-  const fieldSize = 5.0;
-  const fieldMargin = 0.05;
-  const fieldInnerSize = fieldSize - fieldMargin * 2;
-  const cubeMargin = 0.1;
-  const cubeSize = fieldInnerSize / field.length;
-  const cubeInnerSize = cubeSize - cubeMargin * 2;
-  const cubeDelta = -(fieldInnerSize / 2) + cubeSize / 2;
+  // NOTE: Init canvas
+  const canvas = document.getElementById('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  const t = THREE;
+  // NOTE: Init the simulation
+  let currentRule = RULE_DEFAULT;
+  let field       = createEmptyField(FIELD_DEPTH, FIELD_HEIGHT, FIELD_WIDTH);
+  let cubes       = createEmptyField(FIELD_DEPTH, FIELD_HEIGHT, FIELD_WIDTH);
+
+  setCenterCell(field, true);
 
   const scene = new t.Scene();
 
   // NOTE: Init background
-  scene.background = new t.Color(0x000000);
+  scene.background = new t.Color(R_BG_COLOR);
 
   // NOTE: Init camera
   const camera = new t.PerspectiveCamera(
@@ -173,18 +212,13 @@ const app = () => {
   const controls = new THREE.OrbitControls(camera);
 
   // NOTE: Init lighting
-  const ambient = new t.AmbientLight(0x8b8b8b);
+  const ambient = new t.AmbientLight(R_LIGHT_AMBIENT_COLOR);
 
-  const light = new t.DirectionalLight(0xffffff);
+  const light = new t.DirectionalLight(R_LIGHT_DIRECT_COLOR);
   light.position = camera.position;
 
   scene.add(light);
   scene.add(ambient);
-
-  // NOTE: Init canvas
-  const canvas = document.getElementById('canvas');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
 
   // NOTE: Init renderer
   const renderer = new t.WebGLRenderer({
@@ -196,38 +230,19 @@ const app = () => {
   renderer.context.disable(renderer.context.DEPTH_TEST);
 
   // NOTE: Init field
-  const fieldDisplay = new t.Mesh(
-    new t.BoxGeometry(fieldSize, fieldSize, fieldSize),
-    new t.MeshLambertMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.2,
-    }),
-  );
-
-  const cubeGeometry = new t.BoxGeometry(cubeInnerSize, cubeInnerSize, cubeInnerSize);
-  const cubeMaterialTransparent = new t.MeshLambertMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.75,
-  });
-  const cubeMaterialOpaque = new t.MeshLambertMaterial({
-    color: 0xe41654,
-    transparent: true,
-    opacity: 0.75,
-  })
+  const fieldDisplay = new t.Mesh(R_FIELD_GEOMETRY, R_FIELD_MATERIAL);
 
   for (let i = 0; i < FIELD_DEPTH; i++) {
     for (let j = 0; j < FIELD_HEIGHT; j++) {
       for (let k = 0; k < FIELD_WIDTH; k++) {
         const cube = new t.Mesh(
-          cubeGeometry,
-          field[i][j][k] ? cubeMaterialOpaque : cubeMaterialTransparent
+          R_CUBE_GEOMETRY,
+          field[i][j][k] ? R_CUBE_MATERIAL_FILLED : R_CUBE_MATERIAL_BLANK
         );
 
-        cube.position.x = i * cubeSize + cubeDelta;
-        cube.position.y = j * cubeSize + cubeDelta;
-        cube.position.z = k * cubeSize + cubeDelta;
+        cube.position.x = i * R_CUBE_SIZE + R_CUBE_OFFSET;
+        cube.position.y = j * R_CUBE_SIZE + R_CUBE_OFFSET;
+        cube.position.z = k * R_CUBE_SIZE + R_CUBE_OFFSET;
 
         cubes[i][j][k] = cube;
         fieldDisplay.add(cube);
@@ -236,9 +251,6 @@ const app = () => {
   }
 
   scene.add(fieldDisplay);
-
-  const frameRate = 30;
-  const currentFrame = 0;
 
   const animate = () => {
     requestAnimationFrame(animate);
@@ -249,8 +261,8 @@ const app = () => {
       for (let j = 0; j < FIELD_HEIGHT; j++) {
         for (let k = 0; k < FIELD_WIDTH; k++) {
           cubes[i][j][k].material = field[i][j][k]
-            ? cubeMaterialOpaque
-            : cubeMaterialTransparent;
+            ? R_CUBE_MATERIAL_FILLED
+            : R_CUBE_MATERIAL_BLANK;
         }
       }
     }
@@ -264,4 +276,4 @@ const app = () => {
   animate();
 };
 
-app();
+run();
